@@ -1,0 +1,145 @@
+services:
+  rabbitmq:
+    container_name: 'rabbitmq'
+    image: 'rabbitmq:management'
+    
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  eureka:
+    build:
+      context: ./Eureka-Service
+    container_name: eureka-service
+    ports:
+      - "8761:8761"
+    
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/eureka/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gateway-service:
+    build:
+      context: ./API-Gateway-Service
+    container_name: gateway-services
+    ports:
+      - "8080:8080"
+   
+    depends_on:
+      - eureka
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  auth-service:
+    build:
+      context: ./authentication-service
+    container_name: auth-service
+    ports:
+      - "7200:7200"
+    depends_on:
+      - auth-db-server
+      - eureka
+      - rabbitmq
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7200/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  auth-db-server:
+    image: postgres:15
+    container_name: auth-db-server
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  user-service:
+    build:
+      context: ./User-Service
+    container_name: user-service
+    ports:
+      - "8989:8989"
+   
+    depends_on:
+      - user-service-db-server
+      - auth-service
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8989/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  user-service-db-server:
+    image: postgres:15
+    container_name: user-service-db-server
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: user-service
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  specialization-service:
+    build:
+      context: ./specialization-service
+      dockerfile: Dockerfile
+    container_name: specialization-server
+    ports:
+      - "8085:8085"
+    depends_on:
+      - specialization-db-server
+      - eureka
+      - redis
+      - rabbitmq
+    environment:
+     
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  specialization-db-server:
+    image: postgres:15
+    container_name: specialization-db-server
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: specializationDatabase
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  default:
+    name: training-management

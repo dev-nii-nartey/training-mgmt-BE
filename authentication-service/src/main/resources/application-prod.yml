@@ -1,0 +1,41 @@
+spring:
+  app:
+    jwtSecret: ${JWT_SECRET:4A67C29BDB6F78D1AC9E3BFE913DA1B7F9E8A0CB2F0F9B8A33C471F13D2FAEB5}
+    jwt-expiration-ms: 28800000
+  datasource:
+    url: ${db-url:jdbc:postgresql://auth-db-server:5432/}
+    username: ${db-username:postgres}
+    password: ${db-password:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  rabbitmq:
+    host: ${host:localhost}
+    port: 5672
+    username: guest
+    password: guest
+    template:
+      exchange: email.exchange
+      routing-key: email.retry.key
+      default-receive-queue: email.retry.queue
+    data:
+      redis:
+        host: localhost
+        port: 6379
+  eureka:
+    client:
+      service-url:
+        defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://Eureka-Service:8761/eureka/}
+    instance:
+      prefer-ip-address: true
+  server:
+    port: ${SERVER_PORT:7200}
+    
+    

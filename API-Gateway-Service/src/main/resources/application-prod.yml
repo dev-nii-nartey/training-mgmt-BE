@@ -1,0 +1,14 @@
+spring:
+  app:
+    jwtSecret: 4A67C29BDB6F78D1AC9E3BFE913DA1B7F9E8A0CB2F0F9B8A33C471F13D2FAEB5
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://Eureka-Service:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+server:
+  port: ${gateway-port:8080}
+

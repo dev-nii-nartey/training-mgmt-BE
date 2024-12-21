@@ -1,0 +1,184 @@
+services:
+  API-Gateway-Service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:api-gateway-service-fa3f8103e601345ae48e0416a23b91843f0fce1c
+    container_name: api-gateway-service
+    ports:
+      - "6080:8080"
+    env_file:
+      - ./.gateway.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 400m
+    mem_reservation: 156m
+
+  User-Service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:user-service-b8817580d78283fe8eaf2814e845abd82eb97560
+    container_name: user-service
+    env_file:
+      - ./.user.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 450m
+    mem_reservation: 150m
+
+  Email-Service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:email-service-fa3f8103e601345ae48e0416a23b91843f0fce1c
+    container_name: training-email-service
+    env_file:
+      - ./.email.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 300m
+    mem_reservation: 150m
+
+  Cohort-Management-Service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:cohort-management-service-b8817580d78283fe8eaf2814e845abd82eb97560
+    container_name: cohorts-management-service
+    env_file:
+      - ./.cohort.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 450m
+    mem_reservation: 180m
+
+  specialization-service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:specialization-service-fa3f8103e601345ae48e0416a23b91843f0fce1c
+    container_name: specialization-service
+    env_file:
+      - ./.specialization.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 400m
+    mem_reservation: 180m
+
+  User-Profile-Service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:user-profile-service-fa3f8103e601345ae48e0416a23b91843f0fce1c
+    container_name: user-profile-service
+    env_file:
+      - ./.user_profile.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 450m
+    mem_reservation: 150m
+
+  Eureka-Service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:eureka-service-fa3f8103e601345ae48e0416a23b91843f0fce1c
+    container_name: eureka-service
+    ports:
+      - "8761:8761"
+    env_file:
+      - ./.eureka.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 400m
+    mem_reservation: 150m
+
+  authentication-service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:authentication-service-fa3f8103e601345ae48e0416a23b91843f0fce1c
+    container_name: auth-service
+    env_file:
+      - ./.auth.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 500m
+    mem_reservation: 150m
+
+  curriculum-management-service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:curriculum-management-service-b8817580d78283fe8eaf2814e845abd82eb97560
+    container_name: curriculum-management-service
+    env_file:
+      - ./.curriculum.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 450m
+    mem_reservation: 150m
+
+  Grading-service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:grading-service-5eb9429c5be987d5eb1e6cdb7380a21fe8e232c6
+    container_name: grading-service
+    env_file:
+      - ./.grading.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 400m
+    mem_reservation: 150m
+
+  Assessment-Service:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:assessment-service-5eb9429c5be987d5eb1e6cdb7380a21fe8e232c6
+    container_name: assessment-service
+    env_file:
+      - ./.assessment.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 400m
+    mem_reservation: 150m
+
+  Live-Quiz:
+    image: 909544387219.dkr.ecr.eu-west-1.amazonaws.com/training-management:live-quiz-fa3f8103e601345ae48e0416a23b91843f0fce1c
+    container_name: live-quiz-service
+    env_file:
+      - ./.quiz.env
+    networks:
+      - training-management-network
+    restart: on-failure:3
+    mem_limit: 400m
+    mem_reservation: 150m
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+    networks:
+      - training-management-network
+    volumes:
+      - redis-data:/data
+    restart: on-failure:3
+    mem_limit: 150m
+    mem_reservation: 80m
+
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file:
+      - ./.rabbitmq.env
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+    networks:
+      - training-management-network
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmqctl
+    restart: on-failure:3
+    mem_limit: 200m
+    mem_reservation: 100m
+
+volumes:
+  redis-data:
+  rabbitmq-data:
+
+networks:
+  training-management-network:
+    driver: bridge
