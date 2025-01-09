@@ -1,0 +1,12 @@
+<div style="max-width: 600px; margin: auto; padding: 20px; font-family: Arial, sans-serif;">
+    <div style="background-color: #f0f0f0; padding: 10px;">
+        <h1 style="color: #333;">Hi <span th:text="${name}">User</span></h1>
+        <p>Welcome to Trainingsuite! An account has been created for you by our administrator.You can now access the platform to manage your training experience</p>
+        <p>Here are your account details</p>
+        <p>Email: <span th:text="${email}">user@example.com</span></p>
+        <p>Password: <span th:text="${password}">password</span></p>
+        <p>For your security, we recommend updating your password as soon as possible.Please follow the link below to reset your password and get started.</p>
+        <a href="https://training-sys-kahoot-private.vercel.app/auth/login" style="background-color: #ff6600; color: white; padding: 10px 20px; text-decoration: none;">Login</a>
+        <p>Best Regards, <br/> Training Suite Team.</p>
+    </div>
+</div>

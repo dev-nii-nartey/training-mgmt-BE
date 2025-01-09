@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: ${db-url:jdbc:postgresql://localhost:5432/cohort-management}
+    username: ${db-username:postgres}
+    password: ${db-password:admin}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database: postgresql
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+services:
+  specialization:
+    base-url: lb://specialization-service
+  user-profile:
+    base-url: lb://User-Profiles-Service
+  cohort-management:
+    overlapping-period: 0
+resilience4j:
+  circuitbreaker:
+    instances:
+      ExternalServiceBreaker:
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        

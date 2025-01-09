@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: LIVE-QUIZ-SERVICE
+  profiles:
+    active: ${profile:prod }
+server:
+  port: 9600
+ai:
+  urls:
+    aiml: https://api.aimlapi.com/chat/completions
+    openai: ""
+  keys:
+    aiml: 5fc22ff6384e437dae1d889b220430a0
+    openai: ""
+resilience4j:
+  circuitbreaker:
+    instances:
+      LiveQuizBreaker:
+        slidingWindowSize: 11
+        failureRateThreshold: 50
+        waitDurationInOpenState: 60s
+        permittedNumberOfCallsInHalfOpenState: 3
+        minimumNumberOfCalls: 6
+        writableStackTraceEnabled: false
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: 4s
+        

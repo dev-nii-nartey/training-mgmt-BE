@@ -1,0 +1,132 @@
+spring:
+  application:
+    name: Api-Gateway
+  app:
+    jwtSecret: ${JWT_SECRET:4A67C29BDB6F78D1AC9E3BFE913DA1B7F9E8A0CB2F0F9B8A33C471F13D2FAEB5}
+  profiles:
+    active: ${profile:dev}
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        # Authentication and other service routes...
+        - id: authentication-service-route
+          uri: lb://AUTHENTICATION-SERVICE
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: user-service-route
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: cohort-management-route
+          uri: lb://COHORT-MANAGEMENT-SERVICE
+          predicates:
+            - Path=/api/v1/cohorts/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: specialization-service-route
+          uri: lb://SPECIALIZATION-SERVICE
+          predicates:
+            - Path=/api/v1/specializations/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: user-profile-route
+          uri: lb://USER-PROFILE-SERVICE
+          predicates:
+            - Path=/api/v1/profiles/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: email-service-route
+          uri: lb://EMAIL-SERVICE
+          predicates:
+            - Path=/api/v1/emails/**
+
+        - id: grading-service-route
+          uri: lb://GRADING-SERVICE
+          predicates:
+            - Path=/api/v1/grades/**, /api/v1/grade-assessments/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: live-quiz-route
+          uri: lb://LIVE-QUIZ-SERVICE
+          predicates:
+            - Path=/api/v1/quiz/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: assessment-service-route
+          uri: lb://ASSESSMENT-SERVICE
+          predicates:
+            - Path=/api/v1/assignments/**, /api/v1/assessments/**, /api/v1/lab-submissions/**, /api/v1/quizzes/**, /api/v1/quiz-submissions/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: curriculum-service-route
+          uri: lb://CURRICULUM-MANAGEMENT
+          predicates:
+            - Path=/api/v1/curricula/**
+          filters:
+            - name: AuthenticationFilter
+
+        # WebSocket route - ensure WebSocket upgrade headers are forwarded
+        - id: websocket-route
+          uri: lb://LIVE-QUIZ-SERVICE # Points to your WebSocket microservice
+          predicates:
+            - Path=/ws/**
+#          filters:
+#            # WebSocket headers to ensure proper upgrade handling
+#            - name: RequestHeaderToRequestUriFilter
+#              args:
+#                name: Upgrade
+#                value: websocket
+#            - name: RequestHeaderToRequestUriFilter
+#              args:
+#                name: Connection
+#                value: Upgrade
+
+      # CORS configuration for all paths, including WebSocket
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:4200"
+              - "https://training-sys-kahoot-private.vercel.app"
+              - "https://training-management.amalitech-dev.net"
+              - "https://dev.duu3qoluscyig.amplifyapp.com"
+              - "https://endlessly-alert-gnu.ngrok-free.app"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: "true"
+
+opened-endpoints: /api/v1/auth/register,/api/v1/auth/login,/api/v1/auth/send-otp,/api/v1/auth/verify-otp
+
+server:
+  port: ${gateway-port:8080}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    groups:
+      discovery:
+        enabled: true
+        swagger-service-prefix: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG
+    org.springframework.web.socket: DEBUG # Enable WebSocket logging if needed

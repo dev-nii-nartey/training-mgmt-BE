@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: AUTHENTICATION-SERVICE
+  profiles:
+    active: ${profile:dev}
+server:
+  port: ${SERVER_PORT:7200}
